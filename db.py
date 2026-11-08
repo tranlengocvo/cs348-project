@@ -19,10 +19,11 @@ DATABASE = os.path.join(os.path.dirname(__file__), "clubs.db")
 def get_db():
     """Return the request's SQLite connection, creating it on first use."""
     if "db" not in g:
-        # isolation_level="" keeps Python's default: a transaction is
-        # opened automatically before INSERT/UPDATE/DELETE so we can
-        # commit() / rollback() explicitly (see app.py transactions).
-        g.db = sqlite3.connect(DATABASE, isolation_level="")
+        # isolation_level="DEFERRED" keeps Python's default behavior:
+        # a transaction is opened automatically before INSERT/UPDATE/DELETE
+        # so we can commit() / rollback() explicitly (see app.py
+        # transactions).
+        g.db = sqlite3.connect(DATABASE, isolation_level="DEFERRED")
         # Rows behave like dicts: row["first_name"] instead of row[0].
         g.db.row_factory = sqlite3.Row
         # Foreign keys are OFF by default in SQLite; turn them ON per
