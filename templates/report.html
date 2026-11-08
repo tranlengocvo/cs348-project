@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Report — CS 348{% endblock %}
+{% block content %}
+  <h2>Meetings Report</h2>
+  <p class="muted">Requirement 2: filter meetings by date range, club, and
+     room, then view matching meetings plus statistics. The club and room
+     drop-downs are built dynamically from the database (point c).</p>
+
+  <form method="get" action="{{ url_for('report') }}">
+    <div class="filters">
+      <div>
+        <label for="date_from">From date</label>
+        <input id="date_from" name="date_from" type="date"
+               value="{{ filters['date_from'] }}">
+      </div>
+      <div>
+        <label for="date_to">To date</label>
+        <input id="date_to" name="date_to" type="date"
+               value="{{ filters['date_to'] }}">
+      </div>
+      <div>
+        <label for="club_id">Club</label>
+        <select id="club_id" name="club_id">
+          <option value="">— Any club —</option>
+          {% for c in clubs %}
+            <option value="{{ c['club_id'] }}"
+              {{ 'selected' if filters['club_id'] == c['club_id']|string else '' }}>
+              {{ c['name'] }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="room_id">Room</label>
+        <select id="room_id" name="room_id">
+          <option value="">— Any room —</option>
+          {% for r in rooms %}
+            <option value="{{ r['room_id'] }}"
+              {{ 'selected' if filters['room_id'] == r['room_id']|string else '' }}>
+              {{ r['building'] }} {{ r['number'] }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <button class="btn" type="submit">Run report</button>
+    <a class="btn secondary" href="{{ url_for('report') }}">Reset</a>
+  </form>
+
+  <h3 style="margin-top:1.5rem;">Statistics</h3>
+  <table style="max-width:560px;">
+    <tbody>
+      <tr><th>Matching meetings</th><td>{{ stats["n"] }}</td></tr>
+      <tr><th>Average duration (min)</th>
+          <td>{{ "%.1f"|format(stats["avg_duration"]) if stats["avg_duration"] is not none else "—" }}</td></tr>
+      <tr><th>Average invited</th>
+          <td>{{ "%.1f"|format(stats["avg_invited"]) if stats["avg_invited"] is not none else "—" }}</td></tr>
+      <tr><th>Average accepted</th>
+          <td>{{ "%.1f"|format(stats["avg_accepted"]) if stats["avg_accepted"] is not none else "—" }}</td></tr>
+      <tr><th>Average attendance rate</th>
+          <td>{{ "%.1f%%"|format(stats["avg_attendance_rate"] * 100) if stats["avg_attendance_rate"] is not none else "—" }}</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:1.5rem;">Matching meetings</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th><th>Time</th><th>Dur</th><th>Description</th>
+        <th>Club</th><th>Room</th>
+        <th>Invited</th><th>Accepted</th><th>Attended</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in results %}
+      <tr>
+        <td>{{ m["meeting_date"] }}</td>
+        <td>{{ m["meeting_time"] }}</td>
+        <td>{{ m["duration"] }}</td>
+        <td>{{ m["description"] }}</td>
+        <td>{{ m["club_name"] }}</td>
+        <td>{{ m["room_name"] }}</td>
+        <td>{{ m["invited_count"] }}</td>
+        <td>{{ m["accepted_count"] }}</td>
+        <td>{{ m["attended_count"] }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" class="muted">No meetings match these filters.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

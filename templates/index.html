@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Meetings — CS 348{% endblock %}
+{% block content %}
+  <h2>All Meetings</h2>
+  <p class="muted">Requirement 1: add, edit, and delete meetings (main table)
+     and their organizers (supporting table <code>meeting_organizer</code>).</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>Date</th><th>Time</th><th>Dur (min)</th>
+        <th>Description</th><th>Club</th><th>Room</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in meetings %}
+      <tr>
+        <td>{{ m["meeting_id"] }}</td>
+        <td>{{ m["meeting_date"] }}</td>
+        <td>{{ m["meeting_time"] }}</td>
+        <td>{{ m["duration"] }}</td>
+        <td>{{ m["description"] }}</td>
+        <td>{{ m["club_name"] }}</td>
+        <td>{{ m["room_name"] }}</td>
+        <td>
+          <a class="btn secondary" href="{{ url_for('edit_meeting', meeting_id=m['meeting_id']) }}">Edit</a>
+          <form class="inline" method="post"
+                action="{{ url_for('delete_meeting', meeting_id=m['meeting_id']) }}"
+                onsubmit="return confirm('Delete meeting #{{ m['meeting_id'] }}?');">
+            <button class="btn danger" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="muted">No meetings yet. Create one!</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p style="margin-top:1rem;">
+    <a class="btn" href="{{ url_for('add_meeting') }}">+ Create meeting</a>
+  </p>
+{% endblock %}

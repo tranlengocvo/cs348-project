@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}CS 348 Project{% endblock %}</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 2rem auto; max-width: 980px; color: #1b1b1b; }
+    h1 { margin-bottom: .25rem; }
+    nav a { margin-right: 1rem; text-decoration: none; color: #0b5fff; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: .5rem .6rem; text-align: left; }
+    th { background: #f0f3f8; }
+    .btn { display: inline-block; padding: .35rem .7rem; border: 1px solid #0b5fff;
+           border-radius: 4px; background: #0b5fff; color: #fff; text-decoration: none;
+           cursor: pointer; font-size: .9rem; }
+    .btn.secondary { background: #fff; color: #0b5fff; }
+    .btn.danger { background: #d33; border-color: #d33; }
+    form.inline { display: inline; }
+    .filters { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem 1.5rem;
+               margin: 1rem 0; padding: 1rem; background: #f7f9fc; border: 1px solid #e0e6f0; border-radius: 6px; }
+    label { font-size: .9rem; display: block; margin-bottom: .2rem; font-weight: 600; }
+    input, select { padding: .35rem; width: 100%; box-sizing: border-box; }
+    .field { margin-bottom: .75rem; }
+    .flash { padding: .6rem .8rem; border-radius: 4px; margin: .4rem 0; }
+    .flash.success { background: #e6f7ec; border: 1px solid #39a76a; }
+    .flash.error { background: #fdeaea; border: 1px solid #d33; }
+    .muted { color: #666; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <h1>CS 348 — Student Clubs &amp; Meetings</h1>
+  <nav>
+    <a href="{{ url_for('index') }}">Meetings (Req 1)</a>
+    <a href="{{ url_for('report') }}">Report (Req 2)</a>
+    <a href="{{ url_for('add_meeting') }}">+ Create meeting</a>
+  </nav>
+  <hr>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit" if meeting else "Create" }} meeting — CS 348{% endblock %}
+{% block content %}
+  <h2>{{ "Edit" if meeting else "Create" }} Meeting</h2>
+  <p class="muted">Club, room, and organizer options below are loaded
+     dynamically from the database (point c).</p>
+
+  <form method="post" style="max-width:560px;">
+    <div class="field">
+      <label for="meeting_date">Date</label>
+      <input id="meeting_date" name="meeting_date" type="date" required
+             value="{{ meeting['meeting_date'] if meeting else '' }}">
+    </div>
+    <div class="field">
+      <label for="meeting_time">Time</label>
+      <input id="meeting_time" name="meeting_time" type="time" required
+             value="{{ meeting['meeting_time'] if meeting else '' }}">
+    </div>
+    <div class="field">
+      <label for="duration">Duration (minutes)</label>
+      <input id="duration" name="duration" type="number" min="1" required
+             value="{{ meeting['duration'] if meeting else '' }}">
+    </div>
+    <div class="field">
+      <label for="description">Description</label>
+      <input id="description" name="description" required
+             value="{{ meeting['description'] if meeting else '' }}">
+    </div>
+
+    <div class="field">
+      <label for="club_id">Club</label>
+      <select id="club_id" name="club_id" required>
+        {% for c in clubs %}
+          <option value="{{ c['club_id'] }}"
+            {{ 'selected' if meeting and meeting['club_id'] == c['club_id'] else '' }}>
+            {{ c['name'] }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="room_id">Room</label>
+      <select id="room_id" name="room_id" required>
+        {% for r in rooms %}
+          <option value="{{ r['room_id'] }}"
+            {{ 'selected' if meeting and meeting['room_id'] == r['room_id'] else '' }}>
+            {{ r['building'] }} {{ r['number'] }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filters">
+      <div>
+        <label for="invited_count">Invited</label>
+        <input id="invited_count" name="invited_count" type="number" min="0"
+               value="{{ meeting['invited_count'] if meeting else 0 }}">
+      </div>
+      <div>
+        <label for="accepted_count">Accepted</label>
+        <input id="accepted_count" name="accepted_count" type="number" min="0"
+               value="{{ meeting['accepted_count'] if meeting else 0 }}">
+      </div>
+      <div>
+        <label for="attended_count">Attended</label>
+        <input id="attended_count" name="attended_count" type="number" min="0"
+               value="{{ meeting['attended_count'] if meeting else 0 }}">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Organizers (choose one or more)</label>
+      {% for s in students %}
+        <label style="font-weight:normal;">
+          <input type="checkbox" name="organizers" value="{{ s['student_id'] }}"
+            style="width:auto;"
+            {{ 'checked' if s['student_id'] in selected_organizers else '' }}>
+          {{ s['name'] }}
+        </label>
+      {% endfor %}
+    </div>
+
+    <button class="btn" type="submit">{{ "Save changes" if meeting else "Create meeting" }}</button>
+    <a class="btn secondary" href="{{ url_for('index') }}">Cancel</a>
+  </form>
+{% endblock %}
