@@ -1,43 +1,45 @@
 {% extends "base.html" %}
-{% block title %}Meetings — CS 348{% endblock %}
+{% block title %}Assets — CS 348{% endblock %}
 {% block content %}
-  <h2>All Meetings</h2>
-  <p class="muted">Requirement 1: add, edit, and delete meetings (main table)
-     and their organizers (supporting table <code>meeting_organizer</code>).</p>
+  <h2>All Assets</h2>
+  <p class="muted">Requirement 1: add, edit, and delete assets (main table)
+     and their tags (supporting table <code>asset_tag</code>).</p>
 
   <table>
     <thead>
       <tr>
-        <th>ID</th><th>Date</th><th>Time</th><th>Dur (min)</th>
-        <th>Description</th><th>Club</th><th>Room</th><th>Actions</th>
+        <th>ID</th><th>Name</th><th>Serial</th><th>Category</th>
+        <th>Assigned to</th><th>Purchased</th><th>Price</th>
+        <th>Status</th><th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      {% for m in meetings %}
+      {% for a in assets %}
       <tr>
-        <td>{{ m["meeting_id"] }}</td>
-        <td>{{ m["meeting_date"] }}</td>
-        <td>{{ m["meeting_time"] }}</td>
-        <td>{{ m["duration"] }}</td>
-        <td>{{ m["description"] }}</td>
-        <td>{{ m["club_name"] }}</td>
-        <td>{{ m["room_name"] }}</td>
+        <td>{{ a["asset_id"] }}</td>
+        <td>{{ a["asset_name"] }}</td>
+        <td>{{ a["serial_number"] }}</td>
+        <td>{{ a["category_name"] }}</td>
+        <td>{{ a["employee_name"] if a["employee_name"] else "— in stock —" }}</td>
+        <td>{{ a["purchase_date"] }}</td>
+        <td>${{ "%.2f"|format(a["price"]) }}</td>
+        <td>{{ a["status"] }}</td>
         <td>
-          <a class="btn secondary" href="{{ url_for('edit_meeting', meeting_id=m['meeting_id']) }}">Edit</a>
+          <a class="btn secondary" href="{{ url_for('edit_asset', asset_id=a['asset_id']) }}">Edit</a>
           <form class="inline" method="post"
-                action="{{ url_for('delete_meeting', meeting_id=m['meeting_id']) }}"
-                onsubmit="return confirm('Delete meeting #{{ m['meeting_id'] }}?');">
+                action="{{ url_for('delete_asset', asset_id=a['asset_id']) }}"
+                onsubmit="return confirm('Delete {{ a.asset_name }}?');">
             <button class="btn danger" type="submit">Delete</button>
           </form>
         </td>
       </tr>
       {% else %}
-      <tr><td colspan="8" class="muted">No meetings yet. Create one!</td></tr>
+      <tr><td colspan="9" class="muted">No assets yet. Add one!</td></tr>
       {% endfor %}
     </tbody>
   </table>
 
   <p style="margin-top:1rem;">
-    <a class="btn" href="{{ url_for('add_meeting') }}">+ Create meeting</a>
+    <a class="btn" href="{{ url_for('add_asset') }}">+ Add asset</a>
   </p>
 {% endblock %}

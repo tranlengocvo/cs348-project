@@ -1,100 +1,98 @@
 -- ============================================================
 -- CS 348 Project — Database Schema (Stage 2 Deliverable #1)
--- Application: Student Clubs / Meetings Management
--- Database system: SQLite (relational; supports queries,
+-- Application: IT Asset Management (company digital assets
+--              such as laptops, mice, monitors assigned to
+--              employees).
+-- Database system: SQLite (relational; supports SQL,
 -- transactions, and indexes — satisfies the FAQ requirements).
---
--- Design follows the Stage 1 sample schema:
---   Students, Clubs, Rooms, Meetings, MeetingOrganizers
 -- ============================================================
 
 PRAGMA foreign_keys = ON;
 
 -- Drop in dependency order (children before parents) for clean re-init.
-DROP TABLE IF EXISTS meeting_organizer;
-DROP TABLE IF EXISTS meeting;
-DROP TABLE IF EXISTS student;
-DROP TABLE IF EXISTS club;
-DROP TABLE IF EXISTS room;
+DROP TABLE IF EXISTS asset_tag;
+DROP TABLE IF EXISTS asset;
+DROP TABLE IF EXISTS employee;
+DROP TABLE IF EXISTS category;
+DROP TABLE IF EXISTS tag;
 
 -- ------------------------------------------------------------
--- student: people who can organize meetings or be invited.
+-- employee: staff an asset can be assigned to.
+-- Populates the "assigned employee" drop-down.
 -- ------------------------------------------------------------
-CREATE TABLE student (
-    student_id  INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL,
-    email       TEXT    NOT NULL UNIQUE
+CREATE TABLE employee (
+    employee_id  INTEGER PRIMARY KEY AUTOINCREMENT,
+    name         TEXT    NOT NULL,
+    email        TEXT    NOT NULL UNIQUE,
+    department   TEXT    NOT NULL
 );
 
 -- ------------------------------------------------------------
--- club: organizes meetings. Populates the club drop-down.
+-- category: type of asset (Laptop, Monitor, Mouse, ...).
+-- Populates the category drop-down (report + asset form).
 -- ------------------------------------------------------------
-CREATE TABLE club (
-    club_id     INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL UNIQUE,
-    address     TEXT,
-    description TEXT
+CREATE TABLE category (
+    category_id  INTEGER PRIMARY KEY AUTOINCREMENT,
+    name         TEXT    NOT NULL UNIQUE
 );
 
 -- ------------------------------------------------------------
--- room: where a meeting is held. Populates the room drop-down.
+-- tag: free-form labels (e.g. 'remote', 'loaner', 'warranty').
+-- Many-to-many with asset via asset_tag.
 -- ------------------------------------------------------------
-CREATE TABLE room (
-    room_id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    building      TEXT    NOT NULL,
-    number        TEXT    NOT NULL,
-    max_capacity  INTEGER NOT NULL CHECK (max_capacity > 0),
-    UNIQUE (building, number)
+CREATE TABLE tag (
+    tag_id  INTEGER PRIMARY KEY AUTOINCREMENT,
+    name    TEXT    NOT NULL UNIQUE
 );
 
 -- ------------------------------------------------------------
--- meeting: the MAIN table for Requirement 1 (add/edit/delete).
--- invited_count / accepted_count / attended_count feed the
--- report statistics in Requirement 2 (attendance rate, etc.).
+-- asset: the MAIN table for Requirement 1 (add/edit/delete).
+-- purchase_date + price feed the report statistics.
+-- assigned_to may be NULL (an asset can be unassigned / in stock).
 -- ------------------------------------------------------------
-CREATE TABLE meeting (
-    meeting_id     INTEGER PRIMARY KEY AUTOINCREMENT,
-    meeting_date   TEXT    NOT NULL,                 -- ISO 'YYYY-MM-DD'
-    meeting_time   TEXT    NOT NULL,                 -- 'HH:MM'
-    duration       INTEGER NOT NULL CHECK (duration > 0),   -- minutes
-    description    TEXT    NOT NULL,
-    club_id        INTEGER NOT NULL,
-    room_id        INTEGER NOT NULL,
-    invited_count  INTEGER NOT NULL DEFAULT 0 CHECK (invited_count  >= 0),
-    accepted_count INTEGER NOT NULL DEFAULT 0 CHECK (accepted_count >= 0),
-    attended_count INTEGER NOT NULL DEFAULT 0 CHECK (attended_count >= 0),
-    FOREIGN KEY (club_id) REFERENCES club(club_id),
-    FOREIGN KEY (room_id) REFERENCES room(room_id)
+CREATE TABLE asset (
+    asset_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    asset_name     TEXT    NOT NULL,               -- e.g. 'Dell XPS 13'
+    serial_number  TEXT    NOT NULL UNIQUE,
+    category_id    INTEGER NOT NULL,
+    assigned_to    INTEGER,                         -- NULL = in stock
+    purchase_date  TEXT    NOT NULL,                -- ISO 'YYYY-MM-DD'
+    price          REAL    NOT NULL CHECK (price >= 0),
+    status         TEXT    NOT NULL DEFAULT 'in_use'
+                    CHECK (status IN ('in_use', 'in_stock', 'retired')),
+    FOREIGN KEY (category_id) REFERENCES category(category_id),
+    FOREIGN KEY (assigned_to) REFERENCES employee(employee_id)
 );
 
 -- ------------------------------------------------------------
--- meeting_organizer: junction table (many-to-many meeting<->student).
--- Editing a meeting's organizers adds/removes rows here — this is
--- the "supporting table" part of Requirement 1.
--- Composite PK prevents listing the same organizer twice.
+-- asset_tag: junction table (many-to-many asset <-> tag).
+-- Editing an asset's tags adds/removes rows here — this is the
+-- "supporting table" part of Requirement 1.
+-- Composite PK prevents attaching the same tag twice.
 -- ------------------------------------------------------------
-CREATE TABLE meeting_organizer (
-    meeting_id  INTEGER NOT NULL,
-    student_id  INTEGER NOT NULL,
-    PRIMARY KEY (meeting_id, student_id),
-    FOREIGN KEY (meeting_id) REFERENCES meeting(meeting_id) ON DELETE CASCADE,
-    FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE
+CREATE TABLE asset_tag (
+    asset_id  INTEGER NOT NULL,
+    tag_id    INTEGER NOT NULL,
+    PRIMARY KEY (asset_id, tag_id),
+    FOREIGN KEY (asset_id) REFERENCES asset(asset_id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id)   REFERENCES tag(tag_id)     ON DELETE CASCADE
 );
 
 -- ============================================================
 -- INDEXES (discussed in Stage 3, deliverable 1.b)
 -- ============================================================
 
--- The report filters meetings by a date range -> index the date so
--- "meetings BETWEEN start AND end" can seek instead of full-scan.
-CREATE INDEX idx_meeting_date ON meeting (meeting_date);
+-- The report filters assets by a purchase-date range -> index the
+-- date so "purchase_date BETWEEN ? AND ?" can seek, not full-scan.
+CREATE INDEX idx_asset_purchase_date ON asset (purchase_date);
 
--- The report also filters by club and by room (drop-downs). These
--- indexes support those equality filters and the FK joins.
-CREATE INDEX idx_meeting_club ON meeting (club_id);
-CREATE INDEX idx_meeting_room ON meeting (room_id);
+-- The report filters by category (drop-down) -> index supports the
+-- equality filter and the FK join to category.
+CREATE INDEX idx_asset_category ON asset (category_id);
 
--- When editing/deleting a meeting we look up its organizers by
--- student; index student_id so ON DELETE CASCADE and organizer
--- lookups are fast (the PK already covers meeting_id first).
-CREATE INDEX idx_organizer_student ON meeting_organizer (student_id);
+-- Listing/looking up assets by the employee they're assigned to.
+CREATE INDEX idx_asset_assigned ON asset (assigned_to);
+
+-- When editing/deleting a tag we look up its asset rows; index tag_id
+-- (the PK already covers asset_id first) for the cascade and lookups.
+CREATE INDEX idx_asset_tag_tag ON asset_tag (tag_id);

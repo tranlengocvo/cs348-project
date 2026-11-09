@@ -13,7 +13,7 @@ import sqlite3
 from flask import g
 
 # Database file lives next to this script.
-DATABASE = os.path.join(os.path.dirname(__file__), "clubs.db")
+DATABASE = os.path.join(os.path.dirname(__file__), "assets.db")
 
 
 def get_db():
@@ -60,4 +60,4 @@ def init_app(app):
     @app.cli.command("init-db")
     def init_db_command():
         init_db()
-        print("Initialized the database (clubs.db).")
+        print("Initialized the database (assets.db).")

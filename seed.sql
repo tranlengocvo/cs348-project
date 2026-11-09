@@ -3,45 +3,50 @@
 -- (AI assisted in generating this sample data; values reviewed.)
 -- ============================================================
 
-INSERT INTO student (name, email) VALUES
-    ('Alice Johnson', 'alice@purdue.edu'),
-    ('Bob Smith',     'bob@purdue.edu'),
-    ('Carla Nguyen',  'carla@purdue.edu'),
-    ('David Lee',     'david@purdue.edu'),
-    ('Emma Garcia',   'emma@purdue.edu'),
-    ('Frank Miller',  'frank@purdue.edu');
+INSERT INTO employee (name, email, department) VALUES
+    ('Alice Johnson', 'alice@acme.com',  'Engineering'),
+    ('Bob Smith',     'bob@acme.com',    'Sales'),
+    ('Carla Nguyen',  'carla@acme.com',  'Engineering'),
+    ('David Lee',     'david@acme.com',  'Marketing'),
+    ('Emma Garcia',   'emma@acme.com',   'Finance');
 
-INSERT INTO club (name, address, description) VALUES
-    ('Robotics Club',       'EE Building',  'Builds and competes with robots'),
-    ('Chess Club',          'Union 210',    'Weekly chess meetups and tournaments'),
-    ('Data Science Society', 'LWSN 1142',   'Talks and workshops on data science'),
-    ('Hiking Club',         'CoRec',        'Organizes weekend hikes');
+INSERT INTO category (name) VALUES
+    ('Laptop'),
+    ('Monitor'),
+    ('Mouse'),
+    ('Keyboard'),
+    ('Docking Station'),
+    ('Phone');
 
-INSERT INTO room (building, number, max_capacity) VALUES
-    ('LWSN', '1142', 80),
-    ('EE',   '129',  40),
-    ('Union','210',  25),
-    ('WALC', '1055', 120);
+INSERT INTO tag (name) VALUES
+    ('remote'),
+    ('loaner'),
+    ('under_warranty'),
+    ('high_value'),
+    ('needs_repair');
 
--- Meetings: (date, time, duration, description, club_id, room_id,
---            invited, accepted, attended)
-INSERT INTO meeting
-    (meeting_date, meeting_time, duration, description, club_id, room_id,
-     invited_count, accepted_count, attended_count) VALUES
-    ('2026-09-10', '18:00', 60,  'Kickoff meeting',          1, 2, 30, 24, 20),
-    ('2026-09-17', '18:00', 90,  'Build session 1',          1, 2, 30, 18, 15),
-    ('2026-09-12', '19:00', 45,  'Casual chess night',       2, 3, 20, 15, 14),
-    ('2026-10-01', '17:30', 75,  'Intro to pandas workshop', 3, 1, 60, 45, 38),
-    ('2026-10-08', '17:30', 120, 'ML guest speaker',         3, 4, 100, 70, 55),
-    ('2026-10-04', '08:00', 300, 'Fall trail hike',          4, 1, 40, 30, 28),
-    ('2026-11-05', '18:00', 60,  'Build session 2',          1, 2, 30, 22, 19);
+-- Assets: (asset_name, serial, category_id, assigned_to, purchase_date,
+--          price, status)
+INSERT INTO asset
+    (asset_name, serial_number, category_id, assigned_to,
+     purchase_date, price, status) VALUES
+    ('Dell XPS 13',        'SN-LT-0001', 1, 1, '2024-01-15', 1399.00, 'in_use'),
+    ('MacBook Pro 14',     'SN-LT-0002', 1, 3, '2025-03-10', 2199.00, 'in_use'),
+    ('Lenovo ThinkPad',    'SN-LT-0003', 1, NULL, '2023-06-01', 1250.00, 'in_stock'),
+    ('Dell U2723QE 27"',   'SN-MN-0001', 2, 1, '2024-02-20',  589.00, 'in_use'),
+    ('LG 24" Monitor',     'SN-MN-0002', 2, 2, '2022-11-05',  199.00, 'in_use'),
+    ('Logitech MX Master', 'SN-MS-0001', 3, 3, '2025-01-08',  99.00,  'in_use'),
+    ('Keychron K2',        'SN-KB-0001', 4, 4, '2024-09-12',  89.00,  'in_use'),
+    ('CalDigit TS4 Dock',  'SN-DK-0001', 5, 1, '2025-05-01',  379.00, 'in_use'),
+    ('iPhone 15',          'SN-PH-0001', 6, 2, '2024-10-18',  999.00, 'in_use'),
+    ('Old Dell Latitude',  'SN-LT-0004', 1, NULL, '2019-04-22', 800.00, 'retired');
 
--- Organizers for each meeting (meeting_id, student_id).
-INSERT INTO meeting_organizer (meeting_id, student_id) VALUES
-    (1, 1), (1, 2),
-    (2, 1),
-    (3, 3),
-    (4, 4), (4, 5),
-    (5, 4),
-    (6, 6),
-    (7, 2), (7, 1);
+-- Tags per asset (asset_id, tag_id).
+INSERT INTO asset_tag (asset_id, tag_id) VALUES
+    (1, 1), (1, 3),            -- XPS 13: remote, under_warranty
+    (2, 3), (2, 4),            -- MacBook: under_warranty, high_value
+    (3, 2),                    -- ThinkPad: loaner
+    (4, 4),                    -- U2723QE: high_value
+    (6, 1),                    -- MX Master: remote
+    (9, 1), (9, 4),            -- iPhone: remote, high_value
+    (10, 5);                   -- Old Latitude: needs_repair

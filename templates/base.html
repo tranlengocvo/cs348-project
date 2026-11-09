@@ -29,12 +29,13 @@
   </style>
 </head>
 <body>
-  <h1>CS 348 — Student Clubs &amp; Meetings</h1>
+  <h1>CS 348 — IT Asset Management</h1>
   <nav>
-    <a href="{{ url_for('index') }}">Meetings (Req 1)</a>
+    <a href="{{ url_for('index') }}">Assets (Req 1)</a>
     <a href="{{ url_for('report') }}">Report (Req 2)</a>
-    <a href="{{ url_for('add_meeting') }}">+ Create meeting</a>
+    <a href="{{ url_for('add_asset') }}">+ Add asset</a>
   </nav>
+
   <hr>
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
