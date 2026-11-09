@@ -1,5 +1,10 @@
 .venv/
 __pycache__/
 *.pyc
+assets.db
 clubs.db
 school.db
+
+# Course documents (not part of the app source)
+*.pdf
+*.docx
